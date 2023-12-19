@@ -1,39 +1,26 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/garylow2001/GossipGo-Backend/seed"
+	"github.com/garylow2001/GossipGo-Backend/types"
 )
 
-type User struct {
-	ID       string    `json:"id,omitempty"`
-	Username string    `json:"username,omitempty"`
-	Password string    `json:"password,omitempty"`
-	Threads  []Thread  `json:"threads,omitempty"`
-	Comments []Comment `json:"comments,omitempty"`
-}
+var users []types.User
 
-type Thread struct {
-	ID       string    `json:"id,omitempty"`
-	Title    string    `json:"title,omitempty"`
-	Body     string    `json:"body,omitempty"`
-	Author   User      `json:"author,omitempty"`
-	Comments []Comment `json:"comments,omitempty"`
-}
-
-type Comment struct {
-	ID     string `json:"id,omitempty"`
-	Body   string `json:"body,omitempty"`
-	Author User   `json:"author,omitempty"`
-	Thread Thread `json:"thread,omitempty"`
-}
+// var threads []types.Thread
+// var comments []types.Comment
 
 func main() {
 	router := gin.Default()
 
 	// User endpoints
+	router.GET("/users", getUsers)
 	router.POST("/users", createUser)
 	router.GET("/users/:id", getUser)
 	router.PUT("/users/:id", updateUser)
@@ -52,63 +39,116 @@ func main() {
 	threadGroup.PUT("/comments/:id", updateComment)
 	threadGroup.DELETE("/comments/:id", deleteComment)
 
+	// Initialize seed data
+	users = seed.SeededUsers
+	// threads = seed.SeededThreads
+	// comments = seed.SeededComments
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // User handlers
-func createUser(c *gin.Context) {
-	// TODO: Implement create user logic
+func getUsers(context *gin.Context) {
+	context.IndentedJSON(http.StatusOK, users)
 }
 
-func getUser(c *gin.Context) {
-	// TODO: Implement get user logic
+func createUser(context *gin.Context) {
+	var newUser types.User
+
+	if err := context.BindJSON(&newUser); err != nil {
+		return
+	}
+
+	users = append(users, newUser)
+
+	context.IndentedJSON(http.StatusCreated, newUser)
 }
 
-func updateUser(c *gin.Context) {
+func getUser(context *gin.Context) {
+	id := context.Param("id")
+	user, err := getUserByID(id)
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"}) //TODO: abstract out error message
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, user)
+}
+
+func getUserByID(id string) (*types.User, error) {
+	for i, t := range users {
+		if t.ID == id {
+			return &users[i], nil
+		}
+	}
+
+	return nil, errors.New("user not found")
+}
+
+func updateUser(context *gin.Context) {
 	// TODO: Implement update user logic
+	id := context.Param("id")
+	user, err := getUserByID(id)
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+
+	var updatedUser types.User
+
+	if err := context.BindJSON(&updatedUser); err != nil {
+		return
+	}
+
+	user.Username = updatedUser.Username
+	user.Password = updatedUser.Password
+
+	context.IndentedJSON(http.StatusCreated, updatedUser)
 }
 
-func deleteUser(c *gin.Context) {
+func deleteUser(context *gin.Context) {
 	// TODO: Implement delete user logic
 }
 
 // Thread handlers
-func createThread(c *gin.Context) {
+func createThread(context *gin.Context) {
 	// TODO: Implement create thread logic
 }
 
-func getThread(c *gin.Context) {
+func getThread(context *gin.Context) {
 	// TODO: Implement get thread logic
 }
 
-func updateThread(c *gin.Context) {
+func updateThread(context *gin.Context) {
 	// TODO: Implement update thread logic
 }
 
-func deleteThread(c *gin.Context) {
+func deleteThread(context *gin.Context) {
 	// TODO: Implement delete thread logic
 }
 
 // Comment handlers
-func createComment(c *gin.Context) {
+func createComment(context *gin.Context) {
 	// TODO: Implement create comment logic
-	threadID := c.Param("id")
+	// threadID := c.Param("id")
 }
 
-func getComment(c *gin.Context) {
+func getComment(context *gin.Context) {
 	// TODO: Implement get comment logic
-	threadID := c.Param("id")
-	commentID := c.Param("commentID")
+	// threadID := c.Param("id")
+	// commentID := c.Param("commentID")
 }
 
-func updateComment(c *gin.Context) {
+func updateComment(context *gin.Context) {
 	// TODO: Implement update comment logic
-	threadID := c.Param("id")
-	commentID := c.Param("commentID")
+	// threadID := c.Param("id")
+	// commentID := c.Param("commentID")
 }
 
-func deleteComment(c *gin.Context) {
+func deleteComment(context *gin.Context) {
 	// TODO: Implement delete comment logic
-	threadID := c.Param("id")
-	commentID := c.Param("commentID")
+	// threadID := c.Param("id")
+	// commentID := c.Param("commentID")
 }
