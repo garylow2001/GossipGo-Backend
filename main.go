@@ -4,80 +4,111 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
+type User struct {
+	ID       string    `json:"id,omitempty"`
+	Username string    `json:"username,omitempty"`
+	Password string    `json:"password,omitempty"`
+	Threads  []Thread  `json:"threads,omitempty"`
+	Comments []Comment `json:"comments,omitempty"`
+}
+
+type Thread struct {
+	ID       string    `json:"id,omitempty"`
+	Title    string    `json:"title,omitempty"`
+	Body     string    `json:"body,omitempty"`
+	Author   User      `json:"author,omitempty"`
+	Comments []Comment `json:"comments,omitempty"`
+}
+
+type Comment struct {
+	ID     string `json:"id,omitempty"`
+	Body   string `json:"body,omitempty"`
+	Author User   `json:"author,omitempty"`
+	Thread Thread `json:"thread,omitempty"`
+}
+
 func main() {
-	router := mux.NewRouter()
+	router := gin.Default()
 
 	// User endpoints
-	router.HandleFunc("/users", createUser).Methods("POST")
-	router.HandleFunc("/users/{id}", getUser).Methods("GET")
-	router.HandleFunc("/users/{id}", updateUser).Methods("PUT")
-	router.HandleFunc("/users/{id}", deleteUser).Methods("DELETE")
+	router.POST("/users", createUser)
+	router.GET("/users/:id", getUser)
+	router.PUT("/users/:id", updateUser)
+	router.DELETE("/users/:id", deleteUser)
 
 	// Thread endpoints
-	router.HandleFunc("/threads", createThread).Methods("POST")
-	router.HandleFunc("/threads/{id}", getThread).Methods("GET")
-	router.HandleFunc("/threads/{id}", updateThread).Methods("PUT")
-	router.HandleFunc("/threads/{id}", deleteThread).Methods("DELETE")
+	router.POST("/threads", createThread)
+	router.GET("/threads/:id", getThread)
+	router.PUT("/threads/:id", updateThread)
+	router.DELETE("/threads/:id", deleteThread)
 
 	// Comment endpoints
-	router.HandleFunc("/comments", createComment).Methods("POST")
-	router.HandleFunc("/comments/{id}", getComment).Methods("GET")
-	router.HandleFunc("/comments/{id}", updateComment).Methods("PUT")
-	router.HandleFunc("/comments/{id}", deleteComment).Methods("DELETE")
+	threadGroup := router.Group("/threads/:id")
+	threadGroup.POST("/comments", createComment)
+	threadGroup.GET("/comments/:id", getComment)
+	threadGroup.PUT("/comments/:id", updateComment)
+	threadGroup.DELETE("/comments/:id", deleteComment)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // User handlers
-func createUser(w http.ResponseWriter, r *http.Request) {
+func createUser(c *gin.Context) {
 	// TODO: Implement create user logic
 }
 
-func getUser(w http.ResponseWriter, r *http.Request) {
+func getUser(c *gin.Context) {
 	// TODO: Implement get user logic
 }
 
-func updateUser(w http.ResponseWriter, r *http.Request) {
+func updateUser(c *gin.Context) {
 	// TODO: Implement update user logic
 }
 
-func deleteUser(w http.ResponseWriter, r *http.Request) {
+func deleteUser(c *gin.Context) {
 	// TODO: Implement delete user logic
 }
 
 // Thread handlers
-func createThread(w http.ResponseWriter, r *http.Request) {
+func createThread(c *gin.Context) {
 	// TODO: Implement create thread logic
 }
 
-func getThread(w http.ResponseWriter, r *http.Request) {
+func getThread(c *gin.Context) {
 	// TODO: Implement get thread logic
 }
 
-func updateThread(w http.ResponseWriter, r *http.Request) {
+func updateThread(c *gin.Context) {
 	// TODO: Implement update thread logic
 }
 
-func deleteThread(w http.ResponseWriter, r *http.Request) {
+func deleteThread(c *gin.Context) {
 	// TODO: Implement delete thread logic
 }
 
 // Comment handlers
-func createComment(w http.ResponseWriter, r *http.Request) {
+func createComment(c *gin.Context) {
 	// TODO: Implement create comment logic
+	threadID := c.Param("id")
 }
 
-func getComment(w http.ResponseWriter, r *http.Request) {
+func getComment(c *gin.Context) {
 	// TODO: Implement get comment logic
+	threadID := c.Param("id")
+	commentID := c.Param("commentID")
 }
 
-func updateComment(w http.ResponseWriter, r *http.Request) {
+func updateComment(c *gin.Context) {
 	// TODO: Implement update comment logic
+	threadID := c.Param("id")
+	commentID := c.Param("commentID")
 }
 
-func deleteComment(w http.ResponseWriter, r *http.Request) {
+func deleteComment(c *gin.Context) {
 	// TODO: Implement delete comment logic
+	threadID := c.Param("id")
+	commentID := c.Param("commentID")
 }
