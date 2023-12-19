@@ -103,12 +103,12 @@ func DeleteUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, Users)
 }
 
-func removeUser(Users []types.User, user *types.User) []types.User {
-	for i, u := range Users {
+func removeUser(users []types.User, user *types.User) []types.User {
+	for i, u := range users {
 		if u.ID == user.ID {
-			return append(Users[:i], Users[i+1:]...)
+			return append(users[:i], users[i+1:]...)
 		}
 	}
 
-	return Users
+	return users
 }

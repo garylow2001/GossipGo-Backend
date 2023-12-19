@@ -24,6 +24,7 @@ func main() {
 	router.DELETE("/users/:id", handlers.DeleteUser)
 
 	// Thread endpoints
+	router.GET("/threads", handlers.GetThreads)
 	router.POST("/threads", handlers.CreateThread)
 	router.GET("/threads/:id", handlers.GetThread)
 	router.PUT("/threads/:id", handlers.UpdateThread)
