@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -65,7 +66,13 @@ func createUser(context *gin.Context) {
 }
 
 func getUser(context *gin.Context) {
-	id := context.Param("id")
+	id, err := strconv.Atoi(context.Param("id"))
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"}) //TODO: abstract out invalid integer error message
+		return
+	}
+
 	user, err := getUserByID(id)
 
 	if err != nil {
@@ -76,9 +83,9 @@ func getUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, user)
 }
 
-func getUserByID(id string) (*types.User, error) {
-	for i, t := range users {
-		if t.ID == id {
+func getUserByID(id int) (*types.User, error) {
+	for i, u := range users {
+		if u.ID == id {
 			return &users[i], nil
 		}
 	}
@@ -87,8 +94,13 @@ func getUserByID(id string) (*types.User, error) {
 }
 
 func updateUser(context *gin.Context) {
-	// TODO: Implement update user logic
-	id := context.Param("id")
+	id, err := strconv.Atoi(context.Param("id"))
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
 	user, err := getUserByID(id)
 
 	if err != nil {
@@ -109,7 +121,33 @@ func updateUser(context *gin.Context) {
 }
 
 func deleteUser(context *gin.Context) {
-	// TODO: Implement delete user logic
+	id, err := strconv.Atoi(context.Param("id"))
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
+	user, err := getUserByID(id)
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+
+	users = removeUser(users, user)
+
+	context.IndentedJSON(http.StatusCreated, users)
+}
+
+func removeUser(users []types.User, user *types.User) []types.User {
+	for i, u := range users {
+		if u.ID == user.ID {
+			return append(users[:i], users[i+1:]...)
+		}
+	}
+
+	return users
 }
 
 // Thread handlers
