@@ -1,12 +1,4 @@
-package types
-
-type User struct {
-	ID       int       `json:"id,omitempty"`
-	Username string    `json:"username,omitempty"`
-	Password string    `json:"password,omitempty"`
-	Threads  []Thread  `json:"threads,omitempty"`
-	Comments []Comment `json:"comments,omitempty"`
-}
+package models
 
 type Thread struct {
 	ID       int       `json:"id,omitempty"`

@@ -1,46 +1,52 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
-	"github.com/garylow2001/GossipGo-Backend/internal/handlers"
-	"github.com/garylow2001/GossipGo-Backend/seed"
+	"github.com/garylow2001/GossipGo-Backend/controllers"
+	"github.com/garylow2001/GossipGo-Backend/initializers"
 )
 
-// var threads []types.Thread
-// var comments []types.Comment
+func init() {
+	initializers.LoadEnvVariables()
+	initializers.ConnectToDB()
+	initializers.SyncDatabase()
+}
 
 func main() {
 	router := gin.Default()
 
+	setUpRouters(router)
+
+	router.Run()
+}
+
+func setUpRouters(router *gin.Engine) {
 	// User endpoints
-	router.GET("/users", handlers.GetUsers)
-	router.POST("/users", handlers.CreateUser)
-	router.GET("/users/:id", handlers.GetUser)
-	router.PUT("/users/:id", handlers.UpdateUser)
-	router.DELETE("/users/:id", handlers.DeleteUser)
+	router.GET("/users", controllers.GetUsers)
+	router.POST("/users", controllers.CreateUser)
+	router.GET("/users/:id", controllers.GetUser)
+	router.PUT("/users/:id", controllers.UpdateUser)
+	router.DELETE("/users/:id", controllers.DeleteUser)
 
 	// Thread endpoints
-	router.GET("/threads", handlers.GetThreads)
-	router.POST("/threads", handlers.CreateThread)
-	router.GET("/threads/:id", handlers.GetThread)
-	router.PUT("/threads/:id", handlers.UpdateThread)
-	router.DELETE("/threads/:id", handlers.DeleteThread)
+	router.GET("/threads", controllers.GetThreads)
+	router.POST("/threads", controllers.CreateThread)
+	router.GET("/threads/:id", controllers.GetThread)
+	router.PUT("/threads/:id", controllers.UpdateThread)
+	router.DELETE("/threads/:id", controllers.DeleteThread)
 
 	// Comment endpoints
 	threadGroup := router.Group("/threads/:id")
-	threadGroup.POST("/comments", handlers.CreateComment)
-	threadGroup.GET("/comments/:id", handlers.GetComment)
-	threadGroup.PUT("/comments/:id", handlers.UpdateComment)
-	threadGroup.DELETE("/comments/:id", handlers.DeleteComment)
+	threadGroup.POST("/comments", controllers.CreateComment)
+	threadGroup.GET("/comments/:id", controllers.GetComment)
+	threadGroup.PUT("/comments/:id", controllers.UpdateComment)
+	threadGroup.DELETE("/comments/:id", controllers.DeleteComment)
+}
 
+func seedDatabase() {
 	// Initialize seed data
-	handlers.Users = seed.SeededUsers
+	// controllers.Users = seed.SeededUsers
 	// threads = seed.SeededThreads
 	// comments = seed.SeededComments
-
-	log.Fatal(http.ListenAndServe(":8080", router))
 }
