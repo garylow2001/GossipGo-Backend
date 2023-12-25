@@ -78,7 +78,6 @@ func UpdateUser(context *gin.Context) {
 	}
 
 	user.Username = updatedUser.Username
-	user.Password = updatedUser.Password
 
 	context.IndentedJSON(http.StatusCreated, updatedUser)
 }

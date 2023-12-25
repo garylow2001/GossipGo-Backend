@@ -8,12 +8,10 @@ var SeededUsers = []models.User{
 	{
 		// ID:       1,
 		Username: "user1",
-		Password: "password1",
 	},
 	{
 		// ID:       2,
 		Username: "user2",
-		Password: "password2",
 	},
 }
 
