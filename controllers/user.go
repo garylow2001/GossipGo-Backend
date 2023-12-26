@@ -1,15 +1,15 @@
-package handlers
+package controllers
 
 import (
 	"errors"
 	"net/http"
 	"strconv"
 
-	"github.com/garylow2001/GossipGo-Backend/types"
+	"github.com/garylow2001/GossipGo-Backend/models"
 	"github.com/gin-gonic/gin"
 )
 
-var Users []types.User
+var Users []models.User
 
 // User handlers
 func GetUsers(context *gin.Context) {
@@ -17,7 +17,7 @@ func GetUsers(context *gin.Context) {
 }
 
 func CreateUser(context *gin.Context) {
-	var newUser types.User
+	var newUser models.User
 
 	if err := context.BindJSON(&newUser); err != nil {
 		return
@@ -36,7 +36,7 @@ func GetUser(context *gin.Context) {
 		return
 	}
 
-	user, err := getUserByID(id)
+	user, err := getUserByID(uint(id))
 
 	if err != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"}) //TODO: abstract out error message
@@ -46,7 +46,7 @@ func GetUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, user)
 }
 
-func getUserByID(id int) (*types.User, error) {
+func getUserByID(id uint) (*models.User, error) {
 	for i, u := range Users {
 		if u.ID == id {
 			return &Users[i], nil
@@ -64,21 +64,20 @@ func UpdateUser(context *gin.Context) {
 		return
 	}
 
-	user, err := getUserByID(id)
+	user, err := getUserByID(uint(id))
 
 	if err != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
 	}
 
-	var updatedUser types.User
+	var updatedUser models.User
 
 	if err := context.BindJSON(&updatedUser); err != nil {
 		return
 	}
 
 	user.Username = updatedUser.Username
-	user.Password = updatedUser.Password
 
 	context.IndentedJSON(http.StatusCreated, updatedUser)
 }
@@ -91,7 +90,7 @@ func DeleteUser(context *gin.Context) {
 		return
 	}
 
-	user, err := getUserByID(id)
+	user, err := getUserByID(uint(id))
 
 	if err != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"})
@@ -103,7 +102,7 @@ func DeleteUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, Users)
 }
 
-func removeUser(users []types.User, user *types.User) []types.User {
+func removeUser(users []models.User, user *models.User) []models.User {
 	for i, u := range users {
 		if u.ID == user.ID {
 			return append(users[:i], users[i+1:]...)

@@ -1,15 +1,15 @@
-package handlers
+package controllers
 
 import (
 	"errors"
 	"net/http"
 	"strconv"
 
-	"github.com/garylow2001/GossipGo-Backend/types"
+	"github.com/garylow2001/GossipGo-Backend/models"
 	"github.com/gin-gonic/gin"
 )
 
-var Threads []types.Thread
+var Threads []models.Thread
 
 // Thread handlers
 func GetThreads(context *gin.Context) {
@@ -17,7 +17,7 @@ func GetThreads(context *gin.Context) {
 }
 
 func CreateThread(context *gin.Context) {
-	var newThread types.Thread
+	var newThread models.Thread
 
 	// TODO: validate author
 	if err := context.BindJSON(&newThread); err != nil {
@@ -47,7 +47,7 @@ func GetThread(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, thread)
 }
 
-func getThreadByID(id int) (*types.Thread, error) {
+func getThreadByID(id int) (*models.Thread, error) {
 	for i, t := range Threads {
 		if t.ID == id {
 			return &Threads[i], nil
@@ -72,7 +72,7 @@ func UpdateThread(context *gin.Context) {
 		return
 	}
 
-	var updatedThread types.Thread
+	var updatedThread models.Thread
 
 	if err := context.BindJSON(&updatedThread); err != nil {
 		return
@@ -105,7 +105,7 @@ func DeleteThread(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, thread)
 }
 
-func removeThread(threads []types.Thread, thread *types.Thread) []types.Thread {
+func removeThread(threads []models.Thread, thread *models.Thread) []models.Thread {
 	for i, t := range threads {
 		if t.ID == thread.ID {
 			threads = append(threads[:i], threads[i+1:]...)
