@@ -24,7 +24,8 @@ func main() {
 func setUpRouters(router *gin.Engine) {
 	// User endpoints
 	router.GET("/users", controllers.GetUsers)
-	router.POST("/users", controllers.Signup)
+	router.POST("/users/signup", controllers.Signup)
+	router.POST("/users/login", controllers.Login)
 	router.GET("/users/:id", controllers.GetUser)
 	router.PUT("/users/:id", controllers.UpdateUser)
 	router.DELETE("/users/:id", controllers.DeleteUser)
