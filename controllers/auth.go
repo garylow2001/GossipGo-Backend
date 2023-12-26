@@ -27,12 +27,21 @@ func Signup(context *gin.Context) {
 		return
 	}
 
-	user := models.User{Username: body.Username, Auth: models.Auth{Password: string(hash)}}
+	user := models.User{Username: body.Username}
 
-	result := initializers.DB.Create(&user) // pass pointer of data to Create
+	result := initializers.DB.Create(&user)
 
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to create user"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to create user, please use another username"})
+		return
+	}
+
+	auth := models.Auth{UserID: user.ID, Password: string(hash)}
+
+	result = initializers.DB.Create(&auth)
+
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to create auth for user"})
 		return
 	}
 
