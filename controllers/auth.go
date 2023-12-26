@@ -1,6 +1,10 @@
 package controllers
 
 import (
+	"crypto/ecdsa"
+	"crypto/x509"
+	"encoding/pem"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -89,9 +93,16 @@ func Login(context *gin.Context) {
 	}
 
 	var (
+		key         *ecdsa.PrivateKey
 		token       *jwt.Token
 		tokenString string
 	)
+
+	key = getPrivateKey()
+	if err != nil {
+		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to parse JWT key"})
+		return
+	}
 
 	token = jwt.NewWithClaims(jwt.SigningMethodES256,
 		jwt.MapClaims{
@@ -99,7 +110,7 @@ func Login(context *gin.Context) {
 			"exp": time.Now().Add(time.Hour * 72).Unix(),
 		})
 
-	tokenString, err = token.SignedString([]byte(os.Getenv("JWT_KEY")))
+	tokenString, err = token.SignedString(key)
 
 	if err != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to generate token"})
@@ -108,5 +119,31 @@ func Login(context *gin.Context) {
 
 	auth.Token = tokenString
 
+	result = initializers.DB.Model(&auth).Updates(models.Auth{Token: tokenString})
+
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to update auth token"})
+		return
+	}
+
 	context.IndentedJSON(http.StatusOK, gin.H{"message": "Login success", "token": tokenString})
+}
+
+func getPrivateKey() *ecdsa.PrivateKey {
+	keyBytes, err := os.ReadFile("ecdsa_private_key.pem")
+	if err != nil {
+		log.Fatalf("Unable to read private key: %v", err)
+	}
+
+	block, _ := pem.Decode(keyBytes)
+	if block == nil {
+		log.Fatalf("Unable to decode PEM block containing private key")
+	}
+
+	key, err := x509.ParseECPrivateKey(block.Bytes)
+	if err != nil {
+		log.Fatalf("Unable to parse ECDSA private key: %v", err)
+	}
+
+	return key
 }
