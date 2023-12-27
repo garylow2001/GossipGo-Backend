@@ -151,24 +151,8 @@ func GetPrivateKey() *ecdsa.PrivateKey {
 	return key
 }
 
-func Validate(context *gin.Context) {
-	var body struct {
-		Token string
-	}
+func Validate(context *gin.Context) { //Unused
+	user := context.MustGet("user").(models.User)
 
-	if context.Bind(&body) != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to read body"})
-		return
-	}
-
-	var auth models.Auth
-
-	result := initializers.DB.Where("token = ?", body.Token).First(&auth)
-
-	if result.Error != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to find auth"})
-		return
-	}
-
-	context.IndentedJSON(http.StatusOK, gin.H{"message": "Valid token"})
+	context.IndentedJSON(http.StatusOK, gin.H{"user": user})
 }
