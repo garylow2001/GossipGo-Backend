@@ -5,6 +5,7 @@ import (
 
 	"github.com/garylow2001/GossipGo-Backend/controllers"
 	"github.com/garylow2001/GossipGo-Backend/initializers"
+	"github.com/garylow2001/GossipGo-Backend/middleware"
 )
 
 func init() {
@@ -23,7 +24,8 @@ func main() {
 
 func setUpRouters(router *gin.Engine) {
 	// User endpoints
-	router.GET("/users", controllers.GetUsers)
+	router.GET("/validate", middleware.JWTAuthMiddleware, controllers.Validate) //testing with authmiddleware
+	router.GET("/users", middleware.JWTAuthMiddleware, controllers.GetUsers)
 	router.POST("/users/signup", controllers.Signup)
 	router.POST("/users/login", controllers.Login)
 	router.GET("/users/:id", controllers.GetUser)

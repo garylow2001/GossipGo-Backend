@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/garylow2001/GossipGo-Backend/configs"
 	"github.com/garylow2001/GossipGo-Backend/initializers"
 	"github.com/garylow2001/GossipGo-Backend/models"
 	"github.com/gin-gonic/gin"
@@ -98,7 +99,7 @@ func Login(context *gin.Context) {
 		tokenString string
 	)
 
-	key = getPrivateKey()
+	key = GetPrivateKey()
 	if err != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to parse JWT key"})
 		return
@@ -107,7 +108,7 @@ func Login(context *gin.Context) {
 	token = jwt.NewWithClaims(jwt.SigningMethodES256,
 		jwt.MapClaims{
 			"sub": userID,
-			"exp": time.Now().Add(time.Hour * 72).Unix(),
+			"exp": time.Now().Add(configs.JWTExpirationTime).Unix(),
 		})
 
 	tokenString, err = token.SignedString(key)
@@ -119,17 +120,19 @@ func Login(context *gin.Context) {
 
 	auth.Token = tokenString
 
-	result = initializers.DB.Model(&auth).Updates(models.Auth{Token: tokenString})
+	result = initializers.DB.Model(&auth).Updates(models.Auth{Token: tokenString}) //TODO: Remove this if not needed (along with auth.Token)
 
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to update auth token"})
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, gin.H{"message": "Login success", "token": tokenString})
+	context.SetSameSite(http.SameSiteLaxMode)
+	context.SetCookie("Authorization", tokenString, configs.JWTExpirationTimeInSeconds, "", "", false, true)
+	context.IndentedJSON(http.StatusOK, gin.H{"message": "Login success"})
 }
 
-func getPrivateKey() *ecdsa.PrivateKey {
+func GetPrivateKey() *ecdsa.PrivateKey {
 	keyBytes, err := os.ReadFile("ecdsa_private_key.pem")
 	if err != nil {
 		log.Fatalf("Unable to read private key: %v", err)
@@ -146,4 +149,10 @@ func getPrivateKey() *ecdsa.PrivateKey {
 	}
 
 	return key
+}
+
+func Validate(context *gin.Context) { //Unused
+	user := context.MustGet("user").(models.User)
+
+	context.IndentedJSON(http.StatusOK, gin.H{"user": user})
 }
