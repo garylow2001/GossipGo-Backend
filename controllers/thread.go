@@ -9,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var Threads []models.Thread
-
 // Thread handlers
 func GetThreads(context *gin.Context) {
 	var threads []models.Thread
@@ -111,20 +109,9 @@ func DeleteThread(context *gin.Context) {
 		return
 	}
 
-	Threads = removeThread(Threads, thread)
+	initializers.DB.Delete(&thread, id)
 
 	context.IndentedJSON(http.StatusOK, thread)
-}
-
-func removeThread(threads []models.Thread, thread *models.Thread) []models.Thread {
-	for i, t := range threads {
-		if t.ID == thread.ID {
-			threads = append(threads[:i], threads[i+1:]...)
-			break
-		}
-	}
-
-	return threads
 }
 
 func getThreadByID(id int) (*models.Thread, error) {
@@ -137,5 +124,4 @@ func getThreadByID(id int) (*models.Thread, error) {
 	}
 
 	return &thread, nil
-	// return nil, errors.New("thread not found")
 }
