@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/garylow2001/GossipGo-Backend/initializers"
 	"github.com/garylow2001/GossipGo-Backend/models"
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +13,20 @@ var Threads []models.Thread
 
 // Thread handlers
 func GetThreads(context *gin.Context) {
-	context.IndentedJSON(http.StatusOK, Threads)
+	var threads []models.Thread
+	result := initializers.DB.Find(&threads)
+
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error retrieving threads"})
+		return
+	}
+
+	if len(threads) == 0 {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "No threads found"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, threads)
 }
 
 func CreateThread(context *gin.Context) {
@@ -21,10 +34,16 @@ func CreateThread(context *gin.Context) {
 
 	// TODO: validate author
 	if err := context.BindJSON(&newThread); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request body"})
 		return
 	}
 
-	Threads = append(Threads, newThread)
+	// Add new thread to the database
+	result := initializers.DB.Create(&newThread)
+	if result.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create thread"})
+		return
+	}
 
 	context.IndentedJSON(http.StatusCreated, newThread)
 }
@@ -45,16 +64,6 @@ func GetThread(context *gin.Context) {
 	}
 
 	context.IndentedJSON(http.StatusOK, thread)
-}
-
-func getThreadByID(id int) (*models.Thread, error) {
-	for i, t := range Threads {
-		if t.ID == id {
-			return &Threads[i], nil
-		}
-	}
-
-	return nil, errors.New("thread not found")
 }
 
 func UpdateThread(context *gin.Context) {
@@ -80,6 +89,8 @@ func UpdateThread(context *gin.Context) {
 
 	thread.Title = updatedThread.Title
 	thread.Body = updatedThread.Body
+
+	initializers.DB.Save(&thread)
 
 	context.IndentedJSON(http.StatusOK, thread)
 }
@@ -114,4 +125,17 @@ func removeThread(threads []models.Thread, thread *models.Thread) []models.Threa
 	}
 
 	return threads
+}
+
+func getThreadByID(id int) (*models.Thread, error) {
+	var thread models.Thread
+
+	result := initializers.DB.First(&thread, id)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &thread, nil
+	// return nil, errors.New("thread not found")
 }

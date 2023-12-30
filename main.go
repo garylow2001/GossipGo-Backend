@@ -12,6 +12,7 @@ func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB()
 	initializers.SyncDatabase()
+	initializers.ResetValuesInDatabase()
 }
 
 func main() {
@@ -45,11 +46,4 @@ func setUpRouters(router *gin.Engine) {
 	threadGroup.GET("/comments/:id", controllers.GetComment)
 	threadGroup.PUT("/comments/:id", controllers.UpdateComment)
 	threadGroup.DELETE("/comments/:id", controllers.DeleteComment)
-}
-
-func seedDatabase() {
-	// Initialize seed data
-	// controllers.Users = seed.SeededUsers
-	// threads = seed.SeededThreads
-	// comments = seed.SeededComments
 }
