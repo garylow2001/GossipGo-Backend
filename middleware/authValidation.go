@@ -46,7 +46,7 @@ func JWTAuthMiddleware(context *gin.Context) {
 		initializers.DB.First(&user, user_id)
 
 		if user.ID == 0 {
-			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "User not found"})
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "User not found, please log in"})
 			return
 		}
 
