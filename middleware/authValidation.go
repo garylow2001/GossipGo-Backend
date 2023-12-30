@@ -15,7 +15,6 @@ import (
 func JWTAuthMiddleware(context *gin.Context) {
 	// Get token from header
 	tokenString, err := context.Cookie("Authorization")
-	fmt.Println(tokenString)
 
 	if err != nil || tokenString == "" {
 		context.AbortWithStatusJSON(401, gin.H{"message": "No token provided"})
@@ -31,7 +30,6 @@ func JWTAuthMiddleware(context *gin.Context) {
 	})
 
 	if err != nil {
-		fmt.Println(err)
 		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Error parsing token"})
 		return
 	}
