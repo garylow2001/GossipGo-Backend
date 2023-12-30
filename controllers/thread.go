@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -67,18 +66,6 @@ func GetThread(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, thread)
 }
 
-func getThreadByID(id int) (*models.Thread, error) {
-	var thread models.Thread
-
-	result := initializers.DB.First(&thread, id)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return nil, errors.New("thread not found")
-}
-
 func UpdateThread(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("id"))
 
@@ -102,6 +89,8 @@ func UpdateThread(context *gin.Context) {
 
 	thread.Title = updatedThread.Title
 	thread.Body = updatedThread.Body
+
+	initializers.DB.Save(&thread)
 
 	context.IndentedJSON(http.StatusOK, thread)
 }
@@ -136,4 +125,17 @@ func removeThread(threads []models.Thread, thread *models.Thread) []models.Threa
 	}
 
 	return threads
+}
+
+func getThreadByID(id int) (*models.Thread, error) {
+	var thread models.Thread
+
+	result := initializers.DB.First(&thread, id)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &thread, nil
+	// return nil, errors.New("thread not found")
 }
