@@ -47,10 +47,3 @@ func setUpRouters(router *gin.Engine) {
 	threadGroup.PUT("/comments/:id", controllers.UpdateComment)
 	threadGroup.DELETE("/comments/:id", controllers.DeleteComment)
 }
-
-func seedDatabase() {
-	// Initialize seed data
-	// controllers.Users = seed.SeededUsers
-	// threads = seed.SeededThreads
-	// comments = seed.SeededComments
-}
