@@ -5,15 +5,25 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/garylow2001/GossipGo-Backend/initializers"
 	"github.com/garylow2001/GossipGo-Backend/models"
 	"github.com/gin-gonic/gin"
 )
 
 var Users []models.User
+var User models.User
 
 // User handlers
 func GetUsers(context *gin.Context) {
-	context.IndentedJSON(http.StatusOK, Users)
+	var users []models.User
+	result := initializers.DB.Find(&users)
+
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "No user found"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, users)
 }
 
 func CreateUser(context *gin.Context) {
