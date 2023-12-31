@@ -13,8 +13,16 @@ func CreateComment(context *gin.Context) {
 
 func GetComment(context *gin.Context) {
 	// TODO: Implement get comment logic
-	// threadID := context.Param("threadID")
-	// commentID := context.Param("commentID")
+	threadID := context.Param("threadID")
+	commentID := context.Param("commentID")
+
+	println("threadID: " + threadID)
+	println("commentID: " + commentID)
+
+	context.JSON(200, gin.H{
+		"threadID":  threadID,
+		"commentID": commentID,
+	})
 }
 
 func UpdateComment(context *gin.Context) {

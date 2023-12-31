@@ -35,15 +35,15 @@ func setUpRouters(router *gin.Engine) {
 
 	// Thread endpoints
 	router.GET("/threads", controllers.GetThreads)
-	router.POST("/threads", controllers.CreateThread)
-	router.GET("/threads/:id", controllers.GetThread)
-	router.PUT("/threads/:id", controllers.UpdateThread)
-	router.DELETE("/threads/:id", controllers.DeleteThread)
+	router.POST("/threads", middleware.JWTAuthMiddleware, controllers.CreateThread)
+	router.GET("/threads/:threadID", controllers.GetThread)
+	router.PUT("/threads/:threadID", middleware.JWTAuthMiddleware, controllers.UpdateThread)
+	router.DELETE("/threads/:threadID", middleware.JWTAuthMiddleware, controllers.DeleteThread)
 
 	// Comment endpoints
-	threadGroup := router.Group("/threads/:id")
+	threadGroup := router.Group("/threads/:threadID")
 	threadGroup.POST("/comments", controllers.CreateComment)
-	threadGroup.GET("/comments/:id", controllers.GetComment)
-	threadGroup.PUT("/comments/:id", controllers.UpdateComment)
-	threadGroup.DELETE("/comments/:id", controllers.DeleteComment)
+	threadGroup.GET("/comments/:commentID", controllers.GetComment)
+	threadGroup.PUT("/comments/:commentID", controllers.UpdateComment)
+	threadGroup.DELETE("/comments/:commentID", controllers.DeleteComment)
 }
