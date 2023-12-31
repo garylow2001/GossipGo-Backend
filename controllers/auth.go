@@ -151,8 +151,13 @@ func GetPrivateKey() *ecdsa.PrivateKey {
 	return key
 }
 
-func Validate(context *gin.Context) { //Unused
+func Validate(context *gin.Context) {
 	user := context.MustGet("user").(models.User)
+
+	if err := initializers.DB.Preload("Threads").Preload("Comments").First(&user, user.ID).Error; err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+		return
+	}
 
 	context.IndentedJSON(http.StatusOK, gin.H{"user": user})
 }

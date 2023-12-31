@@ -14,6 +14,12 @@ var Users []models.User
 var User models.User
 
 // User handlers
+
+/*
+* GetUsers retrieves all users from the database and returns them as a JSON response.
+* It does not show the posts and comments of the users.
+  - @param context The context of the request.
+*/
 func GetUsers(context *gin.Context) {
 	var users []models.User
 	result := initializers.DB.Find(&users)
@@ -26,6 +32,10 @@ func GetUsers(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, users)
 }
 
+/*
+* CreateUser creates a new user and adds it to the database.
+  - @param context The context of the request.
+*/
 func CreateUser(context *gin.Context) {
 	var newUser models.User
 
@@ -38,6 +48,7 @@ func CreateUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, newUser)
 }
 
+// Unused
 func GetUser(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("id"))
 
@@ -56,6 +67,7 @@ func GetUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, user)
 }
 
+// Unused
 func getUserByID(id uint) (*models.User, error) {
 	for i, u := range Users {
 		if u.ID == id {
@@ -66,6 +78,7 @@ func getUserByID(id uint) (*models.User, error) {
 	return nil, errors.New("user not found")
 }
 
+// Unused
 func UpdateUser(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("id"))
 
@@ -92,6 +105,7 @@ func UpdateUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, updatedUser)
 }
 
+// Unused
 func DeleteUser(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("id"))
 
@@ -112,6 +126,7 @@ func DeleteUser(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, Users)
 }
 
+// Unused
 func removeUser(users []models.User, user *models.User) []models.User {
 	for i, u := range users {
 		if u.ID == user.ID {
