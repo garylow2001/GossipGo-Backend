@@ -13,6 +13,10 @@ import (
 
 // Comment handlers
 
+func GetComments(context *gin.Context) {
+	// TODO: Sort by most recently updated/created
+}
+
 func CreateComment(context *gin.Context) {
 	var newComment models.Comment
 
@@ -29,7 +33,14 @@ func CreateComment(context *gin.Context) {
 		return
 	}
 
-	// Tag the comment with the author and thread
+	commentID, err := getLastCommentID(uint(threadID))
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve last commentID"})
+		return
+	}
+
+	// Tag the comment with the author and thread, and set the commentID
+	newComment.CommentID = commentID + 1
 	newComment.Author = user
 	newComment.ThreadID = uint(threadID) // might need to change to newComment.Thread = thread instead
 
@@ -105,7 +116,7 @@ func retrieveComment(context *gin.Context) (*models.Comment, error) {
 	}
 
 	var comment models.Comment
-	result := initializers.DB.Where("thread_id = ? AND id = ?", threadID, commentID).First(&comment)
+	result := initializers.DB.Where("thread_id = ? AND comment_id = ?", threadID, commentID).First(&comment)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			context.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
@@ -117,4 +128,18 @@ func retrieveComment(context *gin.Context) (*models.Comment, error) {
 	}
 
 	return &comment, nil
+}
+
+func getLastCommentID(threadID uint) (uint, error) {
+	var lastComment models.Comment
+	result := initializers.DB.Where("thread_id = ?", threadID).Order("comment_id").Last(&lastComment)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return 0, nil
+		} else {
+			return 0, result.Error
+		}
+	}
+
+	return lastComment.CommentID, nil
 }
