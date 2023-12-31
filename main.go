@@ -42,8 +42,8 @@ func setUpRouters(router *gin.Engine) {
 
 	// Comment endpoints
 	threadGroup := router.Group("/threads/:threadID")
-	threadGroup.POST("/comments", controllers.CreateComment)
+	threadGroup.POST("/comments", middleware.JWTAuthMiddleware, controllers.CreateComment)
 	threadGroup.GET("/comments/:commentID", controllers.GetComment)
-	threadGroup.PUT("/comments/:commentID", controllers.UpdateComment)
-	threadGroup.DELETE("/comments/:commentID", controllers.DeleteComment)
+	threadGroup.PUT("/comments/:commentID", middleware.JWTAuthMiddleware, controllers.UpdateComment)
+	threadGroup.DELETE("/comments/:commentID", middleware.JWTAuthMiddleware, controllers.DeleteComment)
 }
