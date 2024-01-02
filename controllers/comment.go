@@ -33,6 +33,20 @@ func CreateComment(context *gin.Context) {
 		return
 	}
 
+	// Check if the thread exists
+	var thread models.Thread
+	result := initializers.DB.First(&thread, uint(threadID))
+	if result.Error != nil {
+		context.JSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
+		return
+	}
+
+	// Check if the thread is deleted (technically, after the above check, this code will be unreachable)
+	if thread.DeletedAt.Valid {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Cannot add comment to a deleted thread"})
+		return
+	}
+
 	commentID, err := getLastCommentID(uint(threadID))
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve last commentID"})
@@ -42,10 +56,10 @@ func CreateComment(context *gin.Context) {
 	// Tag the comment with the author and thread, and set the commentID
 	newComment.CommentID = commentID + 1
 	newComment.Author = user
-	newComment.ThreadID = uint(threadID) // might need to change to newComment.Thread = thread instead
+	newComment.ThreadID = uint(threadID)
 
 	// Add new comment to the database
-	result := initializers.DB.Create(&newComment)
+	result = initializers.DB.Create(&newComment)
 	if result.Error != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
 		return
@@ -69,6 +83,14 @@ func UpdateComment(context *gin.Context) {
 		return
 	}
 
+	// check if user is author of comment
+	user := context.MustGet("user").(models.User)
+
+	if comment.Author.ID != user.ID {
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this comment"})
+		return
+	}
+
 	var updatedComment models.Comment
 	if err := context.ShouldBindJSON(&updatedComment); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request body"})
@@ -87,7 +109,15 @@ func UpdateComment(context *gin.Context) {
 
 func DeleteComment(context *gin.Context) {
 	comment, err := retrieveComment(context)
-	if err != nil {
+	if err != nil || comment == nil {
+		return
+	}
+
+	// check if user is author of comment
+	user := context.MustGet("user").(models.User)
+
+	if comment.Author.ID != user.ID {
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this comment"})
 		return
 	}
 
@@ -132,7 +162,7 @@ func retrieveComment(context *gin.Context) (*models.Comment, error) {
 
 func getLastCommentID(threadID uint) (uint, error) {
 	var lastComment models.Comment
-	result := initializers.DB.Where("thread_id = ?", threadID).Order("comment_id").Last(&lastComment)
+	result := initializers.DB.Where("thread_id = ?", threadID).Order("comment_id desc").First(&lastComment)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return 0, nil
