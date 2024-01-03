@@ -16,7 +16,7 @@ func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB()
 	initializers.SyncDatabase()
-	initializers.ResetValuesInDatabase()
+	// initializers.ResetValuesInDatabase() // not in used
 }
 
 func main() {
@@ -30,14 +30,16 @@ func main() {
 
 func setUpCORS(router *gin.Engine) {
 	c := cors.New(cors.Options{
-		AllowedOrigins: configs.CORSAllowedOrigins,
-		AllowedMethods: configs.CORSAllowedMethods,
-		AllowedHeaders: configs.CORSAllowedHeaders,
+		AllowedOrigins:   configs.CORSAllowedOrigins,
+		AllowedMethods:   configs.CORSAllowedMethods,
+		AllowedHeaders:   configs.CORSAllowedHeaders,
+		AllowCredentials: true, //this is to allow cookies to be included in requests from frontend
 	})
 
 	router.Use(func(context *gin.Context) {
 		c.HandlerFunc(context.Writer, context.Request)
 
+		// CORS preflight check
 		if context.Request.Method != "OPTIONS" {
 			context.Next()
 		} else {

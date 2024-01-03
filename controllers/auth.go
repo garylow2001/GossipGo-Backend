@@ -118,10 +118,6 @@ func Login(context *gin.Context) {
 		return
 	}
 
-	auth.Token = tokenString
-
-	result = initializers.DB.Model(&auth).Updates(models.Auth{Token: tokenString}) //TODO: Remove this if not needed (along with auth.Token)
-
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to update auth token"})
 		return
