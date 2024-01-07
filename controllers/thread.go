@@ -157,7 +157,7 @@ func DeleteThread(context *gin.Context) {
 func getThreadByID(id int) (*models.Thread, error) {
 	var thread models.Thread
 
-	result := initializers.DB.Preload("Author").Preload("Comments").Preload("Comments.Author").First(&thread, id)
+	result := initializers.DB.Preload("Author").First(&thread, id)
 
 	if result.Error != nil {
 		return nil, result.Error

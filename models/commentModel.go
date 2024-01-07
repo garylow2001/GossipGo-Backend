@@ -8,6 +8,6 @@ type Comment struct {
 	UserID    uint   `gorm:"not null" json:"author_id,omitempty"`
 	Author    User   `gorm:"foreignKey:UserID" json:"author,omitempty"`
 	ThreadID  uint   `gorm:"not null" json:"thread_id,omitempty"`
-	Thread    Thread `gorm:"foreignKey:ThreadID" json:"thread,omitempty"`
+	Thread    Thread `gorm:"foreignKey:ThreadID" json:"-"`
 	CommentID uint   `gorm:"not null" json:"comment_id,omitempty"`
 }
