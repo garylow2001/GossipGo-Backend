@@ -16,7 +16,6 @@ func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB()
 	initializers.SyncDatabase()
-	// initializers.ResetValuesInDatabase() // not in used
 }
 
 func main() {
