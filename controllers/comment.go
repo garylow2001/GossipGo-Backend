@@ -14,7 +14,28 @@ import (
 // Comment handlers
 
 func GetComments(context *gin.Context) {
-	// TODO: Sort by most recently updated/created
+	threadIDString := context.Param("threadID")
+	threadID, err := strconv.ParseUint(threadIDString, 10, strconv.IntSize)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid threadID"})
+		return
+	}
+
+	var comments []models.Comment
+
+	// return comments sorted by most recent
+	result := initializers.DB.Preload("Author").Where("thread_id = ?", threadID).Order("created_at desc").Find(&comments)
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error retrieving comments"})
+		return
+	}
+
+	if len(comments) == 0 {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "No comments found"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, comments)
 }
 
 func CreateComment(context *gin.Context) {
