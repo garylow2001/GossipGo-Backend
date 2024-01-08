@@ -24,14 +24,14 @@ func Signup(context *gin.Context) {
 	}
 
 	if context.Bind(&body) != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to read body"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to read body"})
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to hash password"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
@@ -40,7 +40,7 @@ func Signup(context *gin.Context) {
 	result := initializers.DB.Create(&user)
 
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to create user, please use another username"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to create user, please use another username"})
 		return
 	}
 
@@ -49,7 +49,7 @@ func Signup(context *gin.Context) {
 	result = initializers.DB.Create(&auth)
 
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to create auth for user"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to create auth for user"})
 		return
 	}
 
@@ -63,7 +63,7 @@ func Login(context *gin.Context) {
 	}
 
 	if context.Bind(&body) != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to read body"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to read body"})
 		return
 	}
 
@@ -73,14 +73,14 @@ func Login(context *gin.Context) {
 	result := initializers.DB.Where("username = ?", body.Username).First(&user)
 
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to find user"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to find user"})
 		return
 	}
 
 	result = initializers.DB.Where("user_id = ?", user.ID).First(&auth)
 
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to find auth for user"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to find auth for user"})
 		return
 	}
 
@@ -89,7 +89,7 @@ func Login(context *gin.Context) {
 	err := bcrypt.CompareHashAndPassword([]byte(auth.Password), []byte(body.Password))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Wrong password"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Wrong password"})
 		return
 	}
 
@@ -101,7 +101,7 @@ func Login(context *gin.Context) {
 
 	key = GetPrivateKey()
 	if err != nil {
-		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to parse JWT key"})
+		context.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse JWT key"})
 		return
 	}
 
@@ -114,12 +114,12 @@ func Login(context *gin.Context) {
 	tokenString, err = token.SignedString(key)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to generate token"})
+		context.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}
 
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to update auth token"})
+		context.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to update auth token"})
 		return
 	}
 

@@ -26,12 +26,12 @@ func GetComments(context *gin.Context) {
 	// return comments sorted by most recent
 	result := initializers.DB.Preload("Author").Where("thread_id = ?", threadID).Order("created_at desc").Find(&comments)
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error retrieving comments"})
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving comments"})
 		return
 	}
 
 	if len(comments) == 0 {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "No comments found"})
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "No comments found"})
 		return
 	}
 
@@ -107,8 +107,8 @@ func UpdateComment(context *gin.Context) {
 	// check if user is author of comment
 	user := context.MustGet("user").(models.User)
 
-	if comment.Author.ID != user.ID {
-		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this comment"})
+	if comment.UserID != user.ID {
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized. You are not the author of this comment"})
 		return
 	}
 
@@ -137,8 +137,8 @@ func DeleteComment(context *gin.Context) {
 	// check if user is author of comment
 	user := context.MustGet("user").(models.User)
 
-	if comment.Author.ID != user.ID {
-		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this comment"})
+	if comment.UserID != user.ID {
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized. You are not the author of this comment"})
 		return
 	}
 
@@ -167,7 +167,7 @@ func retrieveComment(context *gin.Context) (*models.Comment, error) {
 	}
 
 	var comment models.Comment
-	result := initializers.DB.Where("thread_id = ? AND comment_id = ?", threadID, commentID).First(&comment)
+	result := initializers.DB.Preload("Author").Where("thread_id = ? AND comment_id = ?", threadID, commentID).First(&comment)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			context.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})

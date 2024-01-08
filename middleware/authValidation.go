@@ -17,7 +17,7 @@ func JWTAuthMiddleware(context *gin.Context) {
 	tokenString, err := context.Cookie("Authorization")
 
 	if err != nil || tokenString == "" {
-		context.AbortWithStatusJSON(401, gin.H{"message": "No token provided"})
+		context.AbortWithStatusJSON(401, gin.H{"error": "No token provided"})
 		return
 	}
 
@@ -30,7 +30,7 @@ func JWTAuthMiddleware(context *gin.Context) {
 	})
 
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Error parsing token"})
+		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Error parsing token"})
 		return
 	}
 
@@ -39,21 +39,21 @@ func JWTAuthMiddleware(context *gin.Context) {
 		user_id := claims["sub"]
 
 		if time.Now().After(time.Unix(int64(exp), 0)) {
-			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Token expired"})
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
 		}
 
 		var user models.User
 		initializers.DB.First(&user, user_id)
 
 		if user.ID == 0 {
-			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "User not found, please log in"})
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found, please log in"})
 			return
 		}
 
 		context.Set("user", user)
 		context.Next()
 	} else {
-		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 }
