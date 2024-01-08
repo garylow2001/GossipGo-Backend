@@ -125,7 +125,7 @@ func Login(context *gin.Context) {
 
 	context.SetSameSite(http.SameSiteLaxMode)
 	context.SetCookie("Authorization", tokenString, configs.JWTExpirationTimeInSeconds, "", "", false, true)
-	context.IndentedJSON(http.StatusOK, gin.H{"message": "Login success"})
+	context.IndentedJSON(http.StatusOK, gin.H{"user": user})
 }
 
 func GetPrivateKey() *ecdsa.PrivateKey {
