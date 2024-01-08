@@ -145,9 +145,6 @@ func DeleteThread(context *gin.Context) {
 		return
 	}
 
-	// Delete thread from user
-	initializers.DB.Model(&user).Association("Threads").Delete(&thread)
-
 	// Delete thread
 	initializers.DB.Delete(&thread, id)
 
