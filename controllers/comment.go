@@ -107,7 +107,7 @@ func UpdateComment(context *gin.Context) {
 	// check if user is author of comment
 	user := context.MustGet("user").(models.User)
 
-	if comment.Author.ID != user.ID {
+	if comment.UserID != user.ID {
 		context.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized. You are not the author of this comment"})
 		return
 	}
