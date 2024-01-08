@@ -87,7 +87,7 @@ func UpdateThread(context *gin.Context) {
 	user := context.MustGet("user").(models.User)
 
 	if thread.AuthorID != user.ID {
-		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this thread"})
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized. You are not the author of this thread"})
 		return
 	}
 
@@ -126,7 +126,7 @@ func DeleteThread(context *gin.Context) {
 	user := context.MustGet("user").(models.User)
 
 	if thread.AuthorID != user.ID {
-		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this thread"})
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized. You are not the author of this thread"})
 		return
 	}
 

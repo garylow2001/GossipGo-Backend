@@ -108,7 +108,7 @@ func UpdateComment(context *gin.Context) {
 	user := context.MustGet("user").(models.User)
 
 	if comment.Author.ID != user.ID {
-		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this comment"})
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized. You are not the author of this comment"})
 		return
 	}
 
@@ -138,7 +138,7 @@ func DeleteComment(context *gin.Context) {
 	user := context.MustGet("user").(models.User)
 
 	if comment.Author.ID != user.ID {
-		context.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized. You are not the author of this comment"})
+		context.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized. You are not the author of this comment"})
 		return
 	}
 
