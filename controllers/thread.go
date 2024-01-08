@@ -15,12 +15,12 @@ func GetThreads(context *gin.Context) {
 
 	result := initializers.DB.Preload("Author").Find(&threads) // Comments not preloaded as it is not needed here
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error retrieving threads"})
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
 		return
 	}
 
 	if len(threads) == 0 {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "No threads found"})
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "No threads found"})
 		return
 	}
 
@@ -61,7 +61,7 @@ func GetThread(context *gin.Context) {
 	thread, err := getThreadByID(id)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Thread not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"}) //TODO: abstract out error message
 		return
 	}
 
@@ -79,7 +79,7 @@ func UpdateThread(context *gin.Context) {
 	thread, err := getThreadByID(id)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Thread not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"}) //TODO: abstract out error message
 		return
 	}
 
@@ -118,7 +118,7 @@ func DeleteThread(context *gin.Context) {
 	thread, err := getThreadByID(id)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Thread not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"}) //TODO: abstract out error message
 		return
 	}
 

@@ -25,7 +25,7 @@ func GetUsers(context *gin.Context) {
 	result := initializers.DB.Find(&users)
 
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "No user found"})
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "No user found"})
 		return
 	}
 
@@ -60,7 +60,7 @@ func GetUser(context *gin.Context) {
 	user, err := getUserByID(uint(id))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "User not found"}) //TODO: abstract out error message
 		return
 	}
 
@@ -90,7 +90,7 @@ func UpdateUser(context *gin.Context) {
 	user, err := getUserByID(uint(id))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -117,7 +117,7 @@ func DeleteUser(context *gin.Context) {
 	user, err := getUserByID(uint(id))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
