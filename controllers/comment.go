@@ -30,11 +30,6 @@ func GetComments(context *gin.Context) {
 		return
 	}
 
-	if len(comments) == 0 {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "No comments found"})
-		return
-	}
-
 	context.IndentedJSON(http.StatusOK, comments)
 }
 

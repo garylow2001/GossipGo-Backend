@@ -19,11 +19,6 @@ func GetThreads(context *gin.Context) {
 		return
 	}
 
-	if len(threads) == 0 {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "No threads found"})
-		return
-	}
-
 	context.IndentedJSON(http.StatusOK, threads)
 }
 
