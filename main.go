@@ -53,9 +53,10 @@ func setUpRouters(router *gin.Engine) {
 	router.GET("/users", middleware.JWTAuthMiddleware, controllers.GetUsers)
 	router.POST("/users/signup", controllers.Signup)
 	router.POST("/users/login", controllers.Login)
-	router.GET("/users/:id", controllers.GetUser)
-	router.PUT("/users/:id", controllers.UpdateUser)
-	router.DELETE("/users/:id", controllers.DeleteUser)
+	router.POST("/users/logout", controllers.Logout)
+	router.GET("/users/:id", controllers.GetUser)       // Not in use
+	router.PUT("/users/:id", controllers.UpdateUser)    // Not in use
+	router.DELETE("/users/:id", controllers.DeleteUser) // Not in use
 
 	// Thread endpoints
 	router.GET("/threads", controllers.GetThreads)

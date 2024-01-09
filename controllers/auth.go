@@ -128,6 +128,12 @@ func Login(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, gin.H{"user": user})
 }
 
+func Logout(context *gin.Context) {
+	context.SetSameSite(http.SameSiteLaxMode)
+	context.SetCookie("Authorization", "", -1, "/", "", false, true)
+	context.IndentedJSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+}
+
 func GetPrivateKey() *ecdsa.PrivateKey {
 	keyBytes, err := os.ReadFile("ecdsa_private_key.pem")
 	if err != nil {
