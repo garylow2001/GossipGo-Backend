@@ -147,6 +147,12 @@ func GetPrivateKey() *ecdsa.PrivateKey {
 	return key
 }
 
+/*
+* Validate validates the JWT token and returns the user if the token is valid.
+* This is used by the frontend to retrieve the currently logged in user based on
+* the authentication token stored in cookies.
+  - @param context The context of the request.
+*/
 func Validate(context *gin.Context) {
 	user := context.MustGet("user").(models.User)
 
