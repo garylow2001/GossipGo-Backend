@@ -49,7 +49,7 @@ func setUpCORS(router *gin.Engine) {
 
 func setUpRouters(router *gin.Engine) {
 	// User endpoints
-	router.GET("/validate", middleware.JWTAuthMiddleware, controllers.Validate) //testing with authmiddleware
+	router.GET("/validate", middleware.JWTAuthMiddleware, controllers.Validate)
 	router.GET("/users", middleware.JWTAuthMiddleware, controllers.GetUsers)
 	router.POST("/users/signup", controllers.Signup)
 	router.POST("/users/login", controllers.Login)
