@@ -19,11 +19,6 @@ func GetThreads(context *gin.Context) {
 		return
 	}
 
-	if len(threads) == 0 {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "No threads found"})
-		return
-	}
-
 	context.IndentedJSON(http.StatusOK, threads)
 }
 
@@ -132,17 +127,14 @@ func DeleteThread(context *gin.Context) {
 
 	// Delete comments under thread
 	var comments []models.Comment
+	initializers.DB.Where("thread_id = ?", thread.ID).Find(&comments)
 
-	result := initializers.DB.Where("thread_id = ?", thread.ID).Find(&comments)
-	if result.Error != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find comments associated with thread"})
-		return
-	}
-
-	result = initializers.DB.Delete(&comments)
-	if result.Error != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete comments under the thread"})
-		return
+	if len(comments) > 0 {
+		result := initializers.DB.Delete(&comments)
+		if result.Error != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete comments under the thread"})
+			return
+		}
 	}
 
 	// Delete thread
