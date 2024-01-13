@@ -85,7 +85,7 @@ func GetThread(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("threadID"))
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"}) //TODO: abstract out invalid integer error message
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"}) //TODO: abstract out invalid integer error message
 		return
 	}
 
@@ -103,7 +103,7 @@ func UpdateThread(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("threadID"))
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"}) //TODO: abstract out invalid integer error message
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"}) //TODO: abstract out invalid integer error message
 		return
 	}
 
@@ -145,7 +145,7 @@ func DeleteThread(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("threadID"))
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"}) //TODO: abstract out invalid integer error message
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"}) //TODO: abstract out invalid integer error message
 		return
 	}
 
@@ -180,6 +180,83 @@ func DeleteThread(context *gin.Context) {
 	initializers.DB.Delete(&thread, id)
 
 	context.IndentedJSON(http.StatusOK, thread)
+}
+
+func LikeThread(context *gin.Context) {
+	id, err := strconv.Atoi(context.Param("threadID"))
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"})
+		return
+	}
+
+	thread, err := getThreadByID(id)
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
+		return
+	}
+
+	user := context.MustGet("user").(models.User)
+
+	// Check if user has already liked the thread
+	var like models.ThreadLike
+	result := initializers.DB.Where("user_id = ? AND thread_id = ?", user.ID, thread.ID).First(&like)
+
+	if result.Error == nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "You have already liked this thread"})
+		return
+	}
+
+	// Create new like
+	newLike := models.ThreadLike{
+		UserID:   user.ID,
+		ThreadID: thread.ID,
+	}
+
+	result = initializers.DB.Create(&newLike)
+	if result.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like the thread"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, newLike)
+}
+
+func UnlikeThread(context *gin.Context) {
+	id, err := strconv.Atoi(context.Param("threadID"))
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"})
+		return
+	}
+
+	thread, err := getThreadByID(id)
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
+		return
+	}
+
+	user := context.MustGet("user").(models.User)
+
+	// Check if user has already liked the thread
+	var like models.ThreadLike
+	result := initializers.DB.Where("user_id = ? AND thread_id = ?", user.ID, thread.ID).First(&like)
+
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "You have not liked this thread"})
+		return
+	}
+
+	// Delete like
+	result = initializers.DB.Delete(&like)
+	if result.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlike the thread"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, like)
 }
 
 func getThreadByID(id int) (*models.Thread, error) {

@@ -146,18 +146,77 @@ func DeleteComment(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, comment)
 }
 
+func LikeComment(context *gin.Context) {
+	comment, err := retrieveComment(context)
+	if err != nil {
+		return
+	}
+
+	user := context.MustGet("user").(models.User)
+
+	// Check if the user has already liked the comment
+	var like models.CommentLike
+	result := initializers.DB.Where("comment_id = ? AND user_id = ?", comment.CommentID, user.ID).First(&like)
+
+	if result.Error == nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "You have already liked this comment"})
+		return
+	}
+
+	// Create new like
+	newLike := models.CommentLike{
+		UserID:    user.ID,
+		CommentID: comment.CommentID,
+	}
+
+	result = initializers.DB.Create(&newLike)
+	if result.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like the comment"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, newLike)
+}
+
+func UnlikeComment(context *gin.Context) {
+	comment, err := retrieveComment(context)
+	if err != nil {
+		return
+	}
+
+	user := context.MustGet("user").(models.User)
+
+	// Check if the user has liked the comment
+	var like models.CommentLike
+	result := initializers.DB.Where("comment_id = ? AND user_id = ?", comment.CommentID, user.ID).First(&like)
+
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "You have not liked this comment"})
+		return
+	}
+
+	// Delete like
+	result = initializers.DB.Delete(&like)
+	if result.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlike the comment"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, like)
+}
+
 func retrieveComment(context *gin.Context) (*models.Comment, error) {
 	threadIDString := context.Param("threadID")
 	threadID, err := strconv.ParseUint(threadIDString, 10, strconv.IntSize)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid threadID"})
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid thread ID"})
 		return nil, err
 	}
 
 	commentIDString := context.Param("commentID")
 	commentID, err := strconv.ParseUint(commentIDString, 10, strconv.IntSize)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid commentID"})
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid comment ID"})
 		return nil, err
 	}
 
