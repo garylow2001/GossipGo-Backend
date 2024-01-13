@@ -9,4 +9,7 @@ type Thread struct {
 	AuthorID uint      `gorm:"not null" json:"author_id,omitempty"`
 	Author   User      `gorm:"foreignKey:AuthorID" json:"author,omitempty"`
 	Comments []Comment `gorm:"foreignKey:ThreadID" json:"comments,omitempty"`
+	Category string    `json:"category,omitempty"`
 }
+
+var ValidCategories = []string{"Academic", "News", "Technology", "Entertainment", "Hot takes"}
