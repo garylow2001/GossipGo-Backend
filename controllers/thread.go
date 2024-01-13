@@ -6,6 +6,7 @@ import (
 
 	"github.com/garylow2001/GossipGo-Backend/initializers"
 	"github.com/garylow2001/GossipGo-Backend/models"
+	"github.com/garylow2001/GossipGo-Backend/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,6 +15,38 @@ func GetThreads(context *gin.Context) {
 	var threads []models.Thread
 
 	result := initializers.DB.Preload("Author").Find(&threads) // Comments not preloaded as it is not needed here
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, threads)
+}
+
+func GetThreadsByCategory(context *gin.Context) {
+	var threads []models.Thread
+
+	category := context.Param("category")
+
+	if !isValidCategory(category) {
+		category = utils.CapitalizeFirstLetter(category)
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
+		return
+	}
+
+	result := initializers.DB.Preload("Author").Where("category = ?", category).Find(&threads) // Comments not preloaded as it is not needed here
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, threads)
+}
+
+func GetThreadsByMostRecent(context *gin.Context) {
+	var threads []models.Thread
+
+	result := initializers.DB.Preload("Author").Order("updated_at desc").Find(&threads) // Comments not preloaded as it is not needed here
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
 		return
@@ -31,6 +64,9 @@ func CreateThread(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request body"})
 		return
 	}
+
+	// Check if category is valid
+	checkValidCategory(&newThread, context)
 
 	// Tag the thread with the author
 	newThread.Author = user
@@ -93,6 +129,9 @@ func UpdateThread(context *gin.Context) {
 		return
 	}
 
+	// Check if category is valid
+	checkValidCategory(&updatedThread, context)
+
 	thread.Title = updatedThread.Title
 	thread.Body = updatedThread.Body
 
@@ -153,4 +192,21 @@ func getThreadByID(id int) (*models.Thread, error) {
 	}
 
 	return &thread, nil
+}
+
+func checkValidCategory(thread *models.Thread, context *gin.Context) {
+	if thread.Category != "" && !isValidCategory(thread.Category) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
+		context.Abort()
+	}
+}
+
+func isValidCategory(category string) bool {
+	for _, validCategory := range models.ValidCategories {
+		if category == validCategory {
+			return true
+		}
+	}
+
+	return false
 }
