@@ -14,7 +14,7 @@ import (
 func GetThreads(context *gin.Context) {
 	var threads []models.Thread
 
-	result := initializers.DB.Preload("Author").Find(&threads) // Comments not preloaded as it is not needed here
+	result := initializers.DB.Preload("Author").Preload("Likes").Find(&threads) // Comments not preloaded as it is not needed here
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
 		return
@@ -34,7 +34,7 @@ func GetThreadsByCategory(context *gin.Context) {
 		return
 	}
 
-	result := initializers.DB.Preload("Author").Where("category = ?", category).Find(&threads) // Comments not preloaded as it is not needed here
+	result := initializers.DB.Preload("Author").Preload("Likes").Where("category = ?", category).Find(&threads) // Comments not preloaded as it is not needed here
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
 		return
@@ -46,7 +46,7 @@ func GetThreadsByCategory(context *gin.Context) {
 func GetThreadsByMostRecent(context *gin.Context) {
 	var threads []models.Thread
 
-	result := initializers.DB.Preload("Author").Order("updated_at desc").Find(&threads) // Comments not preloaded as it is not needed here
+	result := initializers.DB.Preload("Author").Preload("Likes").Order("updated_at desc").Find(&threads) // Comments not preloaded as it is not needed here
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
 		return
@@ -262,7 +262,7 @@ func UnlikeThread(context *gin.Context) {
 func getThreadByID(id int) (*models.Thread, error) {
 	var thread models.Thread
 
-	result := initializers.DB.Preload("Author").First(&thread, id)
+	result := initializers.DB.Preload("Author").Preload("Likes").First(&thread, id)
 
 	if result.Error != nil {
 		return nil, result.Error
