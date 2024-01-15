@@ -60,7 +60,11 @@ func setUpRouters(router *gin.Engine) {
 
 	// Thread endpoints
 	router.GET("/threads", controllers.GetThreads)
+	router.GET("/threads/category/:category", controllers.GetThreadsByCategory)
+	router.GET("/threads/recent", controllers.GetThreadsByMostRecent)
 	router.POST("/threads", middleware.JWTAuthMiddleware, controllers.CreateThread)
+	router.POST("/threads/:threadID/like", middleware.JWTAuthMiddleware, controllers.LikeThread)
+	router.DELETE("/threads/:threadID/like", middleware.JWTAuthMiddleware, controllers.UnlikeThread)
 	router.GET("/threads/:threadID", controllers.GetThread)
 	router.PUT("/threads/:threadID", middleware.JWTAuthMiddleware, controllers.UpdateThread)
 	router.DELETE("/threads/:threadID", middleware.JWTAuthMiddleware, controllers.DeleteThread)
@@ -68,6 +72,8 @@ func setUpRouters(router *gin.Engine) {
 	// Comment endpoints
 	threadGroup := router.Group("/threads/:threadID")
 	threadGroup.POST("/comments", middleware.JWTAuthMiddleware, controllers.CreateComment)
+	threadGroup.POST("/comments/:commentID/like", middleware.JWTAuthMiddleware, controllers.LikeComment)
+	threadGroup.DELETE("/comments/:commentID/like", middleware.JWTAuthMiddleware, controllers.UnlikeComment)
 	threadGroup.GET("/comments", controllers.GetComments)
 	threadGroup.GET("/comments/:commentID", controllers.GetComment)
 	threadGroup.PUT("/comments/:commentID", middleware.JWTAuthMiddleware, controllers.UpdateComment)
