@@ -220,7 +220,15 @@ func LikeThread(context *gin.Context) {
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, newLike)
+	// Fetch thread again and return the updated likes
+	var updatedThread models.Thread
+	result = initializers.DB.Preload("Author").Preload("Likes").First(&updatedThread, id)
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, updatedThread.Likes)
 }
 
 func UnlikeThread(context *gin.Context) {
@@ -256,7 +264,15 @@ func UnlikeThread(context *gin.Context) {
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, like)
+	// Fetch thread again and return the updated likes
+	var updatedThread models.Thread
+	result = initializers.DB.Preload("Author").Preload("Likes").First(&updatedThread, id)
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, updatedThread.Likes)
 }
 
 func getThreadByID(id int) (*models.Thread, error) {

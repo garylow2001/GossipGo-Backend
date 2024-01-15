@@ -24,7 +24,7 @@ func GetComments(context *gin.Context) {
 	var comments []models.Comment
 
 	// return comments sorted by most recent
-	result := initializers.DB.Preload("Author").Where("thread_id = ?", threadID).Order("created_at desc").Find(&comments)
+	result := initializers.DB.Preload("Author").Preload("Likes").Where("thread_id = ?", threadID).Order("created_at desc").Find(&comments)
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving comments"})
 		return
@@ -156,7 +156,7 @@ func LikeComment(context *gin.Context) {
 
 	// Check if the user has already liked the comment
 	var like models.CommentLike
-	result := initializers.DB.Where("comment_id = ? AND user_id = ?", comment.CommentID, user.ID).First(&like)
+	result := initializers.DB.Where("comment_id = ? AND user_id = ?", comment.ID, user.ID).First(&like)
 
 	if result.Error == nil {
 		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "You have already liked this comment"})
@@ -166,7 +166,7 @@ func LikeComment(context *gin.Context) {
 	// Create new like
 	newLike := models.CommentLike{
 		UserID:    user.ID,
-		CommentID: comment.CommentID,
+		CommentID: comment.ID,
 	}
 
 	result = initializers.DB.Create(&newLike)
@@ -175,7 +175,15 @@ func LikeComment(context *gin.Context) {
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, newLike)
+	// Fetch Comment again and return the updated likes
+	var updatedComment models.Comment
+	result = initializers.DB.Preload("Likes").First(&updatedComment, comment.ID)
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, updatedComment.Likes)
 }
 
 func UnlikeComment(context *gin.Context) {
@@ -188,7 +196,7 @@ func UnlikeComment(context *gin.Context) {
 
 	// Check if the user has liked the comment
 	var like models.CommentLike
-	result := initializers.DB.Where("comment_id = ? AND user_id = ?", comment.CommentID, user.ID).First(&like)
+	result := initializers.DB.Where("comment_id = ? AND user_id = ?", comment.ID, user.ID).First(&like)
 
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "You have not liked this comment"})
@@ -202,7 +210,15 @@ func UnlikeComment(context *gin.Context) {
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, like)
+	// Fetch Comment again and return the updated likes
+	var updatedComment models.Comment
+	result = initializers.DB.Preload("Likes").First(&updatedComment, comment.ID)
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, updatedComment.Likes)
 }
 
 func retrieveComment(context *gin.Context) (*models.Comment, error) {
@@ -221,7 +237,7 @@ func retrieveComment(context *gin.Context) (*models.Comment, error) {
 	}
 
 	var comment models.Comment
-	result := initializers.DB.Preload("Author").Where("thread_id = ? AND comment_id = ?", threadID, commentID).First(&comment)
+	result := initializers.DB.Preload("Author").Preload("Likes").Where("thread_id = ? AND comment_id = ?", threadID, commentID).First(&comment)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			context.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
