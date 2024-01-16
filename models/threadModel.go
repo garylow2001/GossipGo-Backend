@@ -13,4 +13,4 @@ type Thread struct {
 	Likes    []ThreadLike `gorm:"foreignKey:ThreadID" json:"likes,omitempty"`
 }
 
-var ValidCategories = []string{"Academic", "News", "Technology", "Entertainment", "Hot takes"}
+var ValidCategories = []string{"Academic", "News", "Technology", "Entertainment", "Hot Takes"}

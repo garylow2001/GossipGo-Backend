@@ -1,11 +1,18 @@
 package utils
 
-import "strings"
+import (
+	"strings"
 
-func CapitalizeFirstLetter(s string) string {
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+)
+
+func SlugToString(s string) string {
 	if len(s) == 0 {
 		return s
 	}
+	s = strings.ReplaceAll(s, "-", " ")
+	s = cases.Title(language.AmericanEnglish).String(s)
 
-	return strings.ToUpper(string(s[0])) + strings.ToLower(s[1:])
+	return s
 }
