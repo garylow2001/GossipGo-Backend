@@ -27,9 +27,9 @@ func GetThreadsByCategory(context *gin.Context) {
 	var threads []models.Thread
 
 	category := context.Param("category")
+	category = utils.SlugToString(category)
 
 	if !isValidCategory(category) {
-		category = utils.CapitalizeFirstLetter(category)
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
 		return
 	}
