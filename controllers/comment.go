@@ -25,6 +25,13 @@ func GetComments(context *gin.Context) {
 
 	// return comments sorted by most recent
 	result := initializers.DB.Preload("Author").Preload("Likes").Where("thread_id = ?", threadID).Order("created_at desc").Find(&comments)
+	// result := initializers.DB.Model(&models.Comment{}).
+	// Joins("left join comment_likes on comments.id = comment_likes.comment_id").
+	// Select("comments.*, count(comment_likes.id) as likes_count").
+	// Where("thread_id = ?", threadID).
+	// Group("comments.id").
+	// Order("likes_count desc").
+	// Find(&comments)
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving comments"})
 		return

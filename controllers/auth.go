@@ -162,7 +162,13 @@ func GetPrivateKey() *ecdsa.PrivateKey {
 func Validate(context *gin.Context) {
 	user := context.MustGet("user").(models.User)
 
-	if err := initializers.DB.Preload("Threads").Preload("Comments").First(&user, user.ID).Error; err != nil {
+	if err := initializers.DB.
+		Preload("Threads").
+		Preload("Comments").
+		Preload("ThreadLikes").
+		Preload("CommentLikes").
+		First(&user, user.ID).
+		Error; err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
 		return
 	}

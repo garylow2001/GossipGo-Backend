@@ -43,10 +43,22 @@ func GetThreadsByCategory(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, threads)
 }
 
+func GetThreadsByMostPopular(context *gin.Context) {
+	var threads []models.Thread
+
+	result := initializers.DB.Preload("Likes").Preload("Author").Order("likes_count desc").Find(&threads)
+	if result.Error != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, threads)
+}
+
 func GetThreadsByMostRecent(context *gin.Context) {
 	var threads []models.Thread
 
-	result := initializers.DB.Preload("Author").Preload("Likes").Order("updated_at desc").Find(&threads) // Comments not preloaded as it is not needed here
+	result := initializers.DB.Preload("Author").Preload("Likes").Order("updated_at desc").Find(&threads)
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving threads"})
 		return
@@ -220,15 +232,15 @@ func LikeThread(context *gin.Context) {
 		return
 	}
 
-	// Fetch thread again and return the updated likes
-	var updatedThread models.Thread
-	result = initializers.DB.Preload("Author").Preload("Likes").First(&updatedThread, id)
+	// Increment likes count
+	thread.LikesCount++
+	result = initializers.DB.Model(thread).Update("LikesCount", thread.LikesCount)
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like the thread"})
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, updatedThread.Likes)
+	context.IndentedJSON(http.StatusOK, newLike)
 }
 
 func UnlikeThread(context *gin.Context) {
@@ -264,15 +276,16 @@ func UnlikeThread(context *gin.Context) {
 		return
 	}
 
-	// Fetch thread again and return the updated likes
-	var updatedThread models.Thread
-	result = initializers.DB.Preload("Author").Preload("Likes").First(&updatedThread, id)
+	// Decrement like count
+	thread.LikesCount--
+	initializers.DB.Save(&thread)
+	result = initializers.DB.Model(thread).Update("LikesCount", thread.LikesCount)
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlike the thread"})
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, updatedThread.Likes)
+	context.IndentedJSON(http.StatusOK, like)
 }
 
 func getThreadByID(id int) (*models.Thread, error) {

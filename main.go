@@ -62,6 +62,7 @@ func setUpRouters(router *gin.Engine) {
 	router.GET("/threads", controllers.GetThreads)
 	router.GET("/threads/category/:category", controllers.GetThreadsByCategory)
 	router.GET("/threads/recent", controllers.GetThreadsByMostRecent)
+	router.GET("/threads/popular", controllers.GetThreadsByMostPopular)
 	router.POST("/threads", middleware.JWTAuthMiddleware, controllers.CreateThread)
 	router.POST("/threads/:threadID/like", middleware.JWTAuthMiddleware, controllers.LikeThread)
 	router.DELETE("/threads/:threadID/like", middleware.JWTAuthMiddleware, controllers.UnlikeThread)
