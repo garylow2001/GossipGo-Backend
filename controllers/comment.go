@@ -25,13 +25,6 @@ func GetComments(context *gin.Context) {
 
 	// return comments sorted by most recent
 	result := initializers.DB.Preload("Author").Preload("Likes").Where("thread_id = ?", threadID).Order("created_at desc").Find(&comments)
-	// result := initializers.DB.Model(&models.Comment{}).
-	// Joins("left join comment_likes on comments.id = comment_likes.comment_id").
-	// Select("comments.*, count(comment_likes.id) as likes_count").
-	// Where("thread_id = ?", threadID).
-	// Group("comments.id").
-	// Order("likes_count desc").
-	// Find(&comments)
 	if result.Error != nil {
 		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Error retrieving comments"})
 		return
@@ -182,15 +175,15 @@ func LikeComment(context *gin.Context) {
 		return
 	}
 
-	// Fetch Comment again and return the updated likes
-	var updatedComment models.Comment
-	result = initializers.DB.Preload("Likes").First(&updatedComment, comment.ID)
+	// Increment likes count
+	comment.LikesCount++
+	result = initializers.DB.Model(comment).Update("LikesCount", comment.LikesCount)
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like the comment"})
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, updatedComment.Likes)
+	context.IndentedJSON(http.StatusOK, newLike)
 }
 
 func UnlikeComment(context *gin.Context) {
@@ -217,15 +210,15 @@ func UnlikeComment(context *gin.Context) {
 		return
 	}
 
-	// Fetch Comment again and return the updated likes
-	var updatedComment models.Comment
-	result = initializers.DB.Preload("Likes").First(&updatedComment, comment.ID)
+	// Decrement likes count
+	comment.LikesCount--
+	result = initializers.DB.Model(comment).Update("LikesCount", comment.LikesCount)
 	if result.Error != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlike the comment"})
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, updatedComment.Likes)
+	context.IndentedJSON(http.StatusOK, like)
 }
 
 func retrieveComment(context *gin.Context) (*models.Comment, error) {

@@ -12,16 +12,16 @@ func SyncDatabase() {
 	}
 
 	// Ensure the likes_count tally with the actual number of likes in the database
-	var threads []models.Thread
-	result := DB.Preload("Likes").Find(&threads)
+	var comments []models.Comment
+	result := DB.Preload("Likes").Find(&comments)
 	if result.Error != nil {
 		panic(result.Error)
 	}
 
-	for _, thread := range threads {
-		likesCount := len(thread.Likes)
-		thread.LikesCount = likesCount
-		err := DB.Model(thread).Update("LikesCount", thread.LikesCount).Error
+	for i := range comments {
+		likesCount := len(comments[i].Likes)
+		comments[i].LikesCount = likesCount
+		err := DB.Model(&comments[i]).Update("LikesCount", comments[i].LikesCount).Error
 		if err != nil {
 			panic(err)
 		}
