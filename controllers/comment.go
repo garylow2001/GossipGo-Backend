@@ -177,7 +177,7 @@ func LikeComment(context *gin.Context) {
 
 	// Increment likes count
 	comment.LikesCount++
-	result = initializers.DB.Model(comment).Update("LikesCount", comment.LikesCount)
+	result = initializers.DB.Model(comment).UpdateColumn("LikesCount", comment.LikesCount)
 	if result.Error != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like the comment"})
 		return
@@ -212,7 +212,7 @@ func UnlikeComment(context *gin.Context) {
 
 	// Decrement likes count
 	comment.LikesCount--
-	result = initializers.DB.Model(comment).Update("LikesCount", comment.LikesCount)
+	result = initializers.DB.Model(comment).UpdateColumn("LikesCount", comment.LikesCount)
 	if result.Error != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlike the comment"})
 		return

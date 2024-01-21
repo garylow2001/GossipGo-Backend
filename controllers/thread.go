@@ -234,7 +234,7 @@ func LikeThread(context *gin.Context) {
 
 	// Increment likes count
 	thread.LikesCount++
-	result = initializers.DB.Model(thread).Update("LikesCount", thread.LikesCount)
+	result = initializers.DB.Model(thread).UpdateColumn("LikesCount", thread.LikesCount)
 	if result.Error != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like the thread"})
 		return
@@ -278,8 +278,7 @@ func UnlikeThread(context *gin.Context) {
 
 	// Decrement like count
 	thread.LikesCount--
-	initializers.DB.Save(&thread)
-	result = initializers.DB.Model(thread).Update("LikesCount", thread.LikesCount)
+	result = initializers.DB.Model(thread).UpdateColumn("LikesCount", thread.LikesCount)
 	if result.Error != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlike the thread"})
 		return
