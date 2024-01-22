@@ -53,14 +53,14 @@ func GetUser(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("id"))
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"}) //TODO: abstract out invalid integer error message
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
 	user, err := getUserByID(uint(id))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "User not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
