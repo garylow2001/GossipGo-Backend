@@ -17,13 +17,4 @@ func SyncDatabase() {
 	if result.Error != nil {
 		panic(result.Error)
 	}
-
-	for i := range comments {
-		likesCount := len(comments[i].Likes)
-		comments[i].LikesCount = likesCount
-		err := DB.Model(&comments[i]).Update("LikesCount", comments[i].LikesCount).Error
-		if err != nil {
-			panic(err)
-		}
-	}
 }
