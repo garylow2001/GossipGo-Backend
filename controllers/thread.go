@@ -97,14 +97,14 @@ func GetThread(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("threadID"))
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"}) //TODO: abstract out invalid integer error message
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"})
 		return
 	}
 
 	thread, err := getThreadByID(id)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
 		return
 	}
 
@@ -115,14 +115,13 @@ func UpdateThread(context *gin.Context) {
 	id, err := strconv.Atoi(context.Param("threadID"))
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"}) //TODO: abstract out invalid integer error message
-		return
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"})
 	}
 
 	thread, err := getThreadByID(id)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
 		return
 	}
 
@@ -146,6 +145,7 @@ func UpdateThread(context *gin.Context) {
 
 	thread.Title = updatedThread.Title
 	thread.Body = updatedThread.Body
+	thread.Category = updatedThread.Category
 
 	initializers.DB.Save(&thread)
 
@@ -153,18 +153,17 @@ func UpdateThread(context *gin.Context) {
 }
 
 func DeleteThread(context *gin.Context) {
-	// TODO: ensure only author can delete thread
 	id, err := strconv.Atoi(context.Param("threadID"))
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"}) //TODO: abstract out invalid integer error message
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Thread ID format"})
 		return
 	}
 
 	thread, err := getThreadByID(id)
 
 	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"}) //TODO: abstract out error message
+		context.IndentedJSON(http.StatusNotFound, gin.H{"error": "Thread not found"})
 		return
 	}
 
