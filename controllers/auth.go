@@ -123,14 +123,30 @@ func Login(context *gin.Context) {
 		return
 	}
 
-	context.SetSameSite(http.SameSiteLaxMode)
-	context.SetCookie("Authorization", tokenString, configs.JWTExpirationTimeInSeconds, "", "", false, true)
+	context.SetSameSite(http.SameSiteNoneMode)
+	context.SetCookie(
+		"Authorization",
+		tokenString,
+		configs.JWTExpirationTimeInSeconds,
+		"",
+		"gossipgo-backend.onrender.com",
+		true,
+		true,
+	)
 	context.IndentedJSON(http.StatusOK, gin.H{"user": user})
 }
 
 func Logout(context *gin.Context) {
-	context.SetSameSite(http.SameSiteLaxMode)
-	context.SetCookie("Authorization", "", -1, "/", "", false, true)
+	context.SetSameSite(http.SameSiteNoneMode)
+	context.SetCookie(
+		"Authorization",
+		"",
+		-1,
+		"",
+		"gossipgo-backend.onrender.com",
+		true,
+		true,
+	)
 	context.IndentedJSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }
 
